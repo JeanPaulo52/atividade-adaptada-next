@@ -1160,7 +1160,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/fisica/pagdow/forca-e-suas-medidas-entendendo-grandezas-escalares-e-vetoriais/forca-e-suas-medidas-entendendo-grandezas-escalares-e-vetoriais.html',
+        source: '/nivel-2/2-bncc/fisica/pagdow/forca-e-suas-medidas-entendendo-grandezas-escalares-e-vetoriais/forca-e-suas-medidas-entendendo-grandezas-escalares-e-vetoriais',
         destination: '/atividades/fisica/5xoYt80tDnW2l9xUeSdQ',
 
         permanent: true,
@@ -2035,14 +2035,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-16/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-16/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/hkxUMAnu6c63bU1lcD2f',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-7/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-7/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/U97yT9DdJd4orojM3QUQ',
 
         permanent: true,
@@ -2056,21 +2056,21 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/mestre-das-pipas/atividade-mestre-das-pipas.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/mestre-das-pipas/atividade-mestre-das-pipas',
         destination: '/atividades/matematica/gR3DdNJqSwTwIyAe0N7V',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-8/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-8/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/2Vg780hweh46Iwah7ztN',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-17/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-17/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/EdMKroypu2yipIhB1K36',
 
         permanent: true,
@@ -2091,14 +2091,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-18/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-18/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/VltXHTrbjGme5a2zsj2l',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-9/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-9/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/xewL3ctzgkDuLtz5HZZX',
 
         permanent: true,
@@ -2133,7 +2133,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-19/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-19/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/2lDt3ZZaZwZDj03REOR1',
 
         permanent: true,
@@ -2168,35 +2168,35 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/montando-a-nossa-casinha/atividade-montando-a-nossa-casinha.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/montando-a-nossa-casinha/atividade-montando-a-nossa-casinha',
         destination: '/atividades/matematica/TM1MBp4FTJAgjs2xluOH',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/montando-minha-pipa-colorida/atividade-montando-minha-pipa-colorida.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/montando-minha-pipa-colorida/atividade-montando-minha-pipa-colorida',
         destination: '/atividades/matematica/37xqAG3VgR1PmSJd9lAn',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/cruzadinha-de-menos/cruzadinha-atividade-de-matematica-para-imprimir-gratis.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/cruzadinha-de-menos/cruzadinha-atividade-de-matematica-para-imprimir-gratis',
         destination: '/atividades/matematica/2GztGx5T9nkZgtB3ZgD0',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-20/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-20/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/SBRgilyszrsNvqQ3Cl5M',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/arquiteto(a)-de-sonhos/atividade-arquiteto(a)-de-sonhos.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/arquiteto(a)-de-sonhos/atividade-arquiteto(a)-de-sonhos',
         destination: '/atividades/matematica/vsK7ky2zJL5NvCz5y2UO',
 
         permanent: true,
@@ -2210,7 +2210,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-21/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-21/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/ZwI5fCwqD4cZyxEjK1hJ',
 
         permanent: true,
@@ -2238,35 +2238,35 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/defensores-da-amazonia/atividade-de-matematica-defensores-da-amazonia.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/defensores-da-amazonia/atividade-de-matematica-defensores-da-amazonia',
         destination: '/atividades/matematica/hdGHdTP20dz240uV8OI5',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-22/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-22/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/HRg4hcTIYVVgXexpUIhW',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-10/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-10/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/NwdVoc5ZWkL1lN6UbHgu',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-11/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-11/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/DKLRkkY58Stdhi5wfmtc',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-23/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-23/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/WbM7xHAkub92dQKM7rgM',
 
         permanent: true,
@@ -2301,14 +2301,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-12/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-12/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/DKLRkkY58Stdhi5wfmtc',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-13/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-13/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/tzaN0pu3A9FnMcw7Gd4Q',
 
         permanent: true,
@@ -2357,14 +2357,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-14/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-14/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/2jdEHA438JKxkQV2tgxr',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-15/atividade_adaptada_de_matematica.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/atd-mat-15/atividade_adaptada_de_matematica',
         destination: '/atividades/matematica/FCjebrYtkpEmA8FKVIWd',
 
         permanent: true,
@@ -2378,7 +2378,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/matematica/pagdow/jardineiros-da-floresta/atividade-de-matematica-jardineiros-da-floresta.html',
+        source: '/nivel-2/2-bncc/matematica/pagdow/jardineiros-da-floresta/atividade-de-matematica-jardineiros-da-floresta',
         destination: '/atividades/matematica/yH36JemjNamcMhzMRMY0',
 
         permanent: true,
@@ -3127,7 +3127,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/1-pagina-inicial/2-artigos/2---a-historia-da-educacao-especial/historia-da-educacao-especial-no-brasil.html',
+        source: '/nivel-2/1-pagina-inicial/2-artigos/2---a-historia-da-educacao-especial/historia-da-educacao-especial-no-brasil',
         destination: '/artigos/LOBamYtiKOIIYRXOaK5O',
 
         permanent: true,
@@ -3225,14 +3225,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/categorias.html',
+        source: '/nivel-2/categorias',
         destination: '/atividades',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/1-pagina-inicial/1-paginas/artigos.html',
+        source: '/nivel-2/1-pagina-inicial/1-paginas/artigos',
         destination: '/artigos',
 
         permanent: true,
