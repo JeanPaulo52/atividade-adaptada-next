@@ -320,7 +320,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/biologia/pagdow/aula-desafio-o-que-esta-aquecendo-nosso-planeta/aula-desafio-o-que-esta-aquecendo-nosso-planeta.html',
+        source: '/nivel-2/2-bncc/biologia/pagdow/aula-desafio-o-que-esta-aquecendo-nosso-planeta/aula-desafio-o-que-esta-aquecendo-nosso-planeta',
         destination: '/atividades/biologia/9xGalFj5ZqHlsftsn3c7',
 
         permanent: true,
@@ -432,14 +432,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-2/atd-arts-2.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-2/atd-arts-2',
         destination: '/atividades/ciencias/bgUm0qNYDnAqYY1gZwXQ',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-8/atividade_adaptada_de_ciencias.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-8/atividade_adaptada_de_ciencias',
         destination: '/atividades/ciencias/a869tf2XM2MbccOs3ux8',
 
         permanent: true,
@@ -460,14 +460,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-9/atividade_adaptada_de_ciencias.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-9/atividade_adaptada_de_ciencias',
         destination: '/atividades/ciencias/yxxxOmlbO9dWdFYxLAsB',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-3/atd-arts-3.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-3/atd-arts-3',
         destination: '/atividades/ciencias/fpgslzC0zKc8VkzXcwWX',
 
         permanent: true,
@@ -488,7 +488,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-4/atd-arts-4.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-4/atd-arts-4',
         destination: '/atividades/ciencias/QLBDFfMTlbY8SowA94G7',
 
         permanent: true,
@@ -523,7 +523,7 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-5/atd-arts-5.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-5/atd-arts-5',
         destination: '/atividades/ciencias/COYBJ8TAGjtcpei8S8wK',
 
         permanent: true,
@@ -537,14 +537,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-1/atd-arts-1.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-1/atd-arts-1',
         destination: '/atividades/ciencias/Pt5Xjk3uaqwUuw9pFbVI',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-6/atd-arts-6.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-6/atd-arts-6',
         destination: '/atividades/ciencias/ltCsSsKqGYq3gaqDiuoQ',
 
         permanent: true,
@@ -579,14 +579,14 @@ const nextConfig: NextConfig = {
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-7/atividade_adaptada_de_ciencias.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-7/atividade_adaptada_de_ciencias',
         destination: '/atividades/ciencias/bsDPqljhKE1dv2HNy4Pu',
 
         permanent: true,
       },
 
       {
-        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-10/atividade_adaptada_de_ciencias.html',
+        source: '/nivel-2/2-bncc/ciencias/pagdow/atd-cie-10/atividade_adaptada_de_ciencias',
         destination: '/atividades/ciencias/WucHA8jk5zlvgMAPphLe',
 
         permanent: true,
