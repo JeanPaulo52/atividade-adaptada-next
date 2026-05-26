@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from '../lib/firebase';
 import { 
   collection, addDoc, onSnapshot, query, orderBy, 
-  doc, getDoc, deleteDoc, updateDoc, increment, arrayUnion, arrayRemove 
+  doc, getDoc, deleteDoc, updateDoc, increment, arrayUnion, arrayRemove, setDoc 
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
@@ -66,18 +66,19 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
         quemCurtiu: [] 
       });
       
-      // 🌟 NOVA PARTE: NOTIFICAR O DONO DA POSTAGEM 🌟
+      // 🚀 ALGORITMO DE RELEVÂNCIA: Adiciona +1 no contador principal do Post
       const postRef = doc(db, tipo, slug);
+      await setDoc(postRef, { totalComentarios: increment(1) }, { merge: true });
+
+      // 🌟 NOTIFICAR O DONO DA POSTAGEM 🌟
       const postSnap = await getDoc(postRef);
 
       if (postSnap.exists()) {
         const postData = postSnap.data();
         const idDoDono = postData.userId || postData.autorId;
 
-        // Se o dono não for a mesma pessoa comentando, avisa ele!
         if (idDoDono && idDoDono !== user.uid) {
           
-          // Constrói o link certinho igual fizemos no Like
           let urlFinal = `/artigos/${slug}`; 
           if (tipo === 'atividades') {
             const mat = postData.materia ? postData.materia.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : 'geral';
@@ -101,7 +102,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
           });
         }
       }
-      // ===============================================
 
       setNovoComentario("");
     } catch (error) {
@@ -115,12 +115,16 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
     if (!confirm("Tem certeza que deseja excluir seu comentário?")) return;
     try {
       await deleteDoc(doc(db, tipo, slug, 'comentarios', id));
+      
+      // 🚀 ALGORITMO DE RELEVÂNCIA: Remove -1 do contador principal do Post
+      const postRef = doc(db, tipo, slug);
+      await setDoc(postRef, { totalComentarios: increment(-1) }, { merge: true });
+      
     } catch (error) {
       console.error("Erro ao excluir:", error);
     }
   };
 
-  // 🌟 ADICIONAMOS O autorComentarioId COMO PARÂMETRO AQUI 🌟
   const alternarCurtida = async (comentarioId: string, jaCurtiu: boolean, autorComentarioId: string) => {
     if (!user) {
       alert("Faça login para curtir!");
@@ -141,7 +145,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
           quemCurtiu: arrayUnion(user.uid)
         });
 
-        // 🌟 NOVA PARTE: NOTIFICAR O DONO DO COMENTÁRIO PELO LIKE 🌟
         if (autorComentarioId !== user.uid) {
           const postRef = doc(db, tipo, slug);
           const postSnap = await getDoc(postRef);
@@ -167,7 +170,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
             data: Date.now()
           });
         }
-        // ==========================================================
       }
     } catch (error) {
       console.error("Erro ao curtir:", error);
@@ -208,8 +210,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
           
           return (
             <div key={com.id} className="flex gap-4 group">
-              
-              {/* FOTO COM LINK PARA O PERFIL */}
               <Link href={`/profile/${com.autorId}`} className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-blue-400 transition-all">
                   {com.autorFoto ? (
@@ -223,8 +223,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
               <div className="flex-1">
                 <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-none border border-slate-100 relative">
                   <div className="flex justify-between items-center mb-1">
-                    
-                    {/* NOME COM LINK PARA O PERFIL */}
                     <Link href={`/profile/${com.autorId}`} className="hover:underline decoration-blue-500">
                       <span className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">
                         {com.autorNome}
@@ -245,7 +243,6 @@ export default function Comentarios({ slug, tipo }: { slug: string, tipo: 'ativi
 
                   <div className="flex items-center gap-4 border-t border-slate-200 pt-2">
                     <button 
-                      // 🌟 PASSANDO O AUTOR DO COMENTÁRIO AQUI 🌟
                       onClick={() => alternarCurtida(com.id, jaCurtiu, com.autorId)}
                       className="flex items-center gap-1"
                     >

@@ -63,7 +63,7 @@ export default function Navbar() {
         
         {/* NAVEGAÇÃO DESKTOP (Escondida no celular) */}
         <nav className="hidden md:flex container mx-auto px-4 sm:px-6 py-3 justify-between items-center">
-          {/* LOGO */}
+          {/* LOGO DESKTOP */}
           <Link href="/" className="text-2xl font-extrabold tracking-tight hover:opacity-80 transition-opacity">
             <span className="text-red-600">Atividade</span>
             <span className="text-blue-600">Adaptada</span>
@@ -135,9 +135,11 @@ export default function Navbar() {
 
         {/* NAVEGAÇÃO DE TOPO MOBILE (Apenas Logo, Pesquisa e Ícones) */}
         <nav className="md:hidden flex justify-between items-center px-4 py-3">
-          <Link href="/" className="text-xl font-extrabold tracking-tight">
-            <span className="text-red-600">Ativ</span>
-            <span className="text-blue-600">Adaptada</span>
+          {/* 👇 LOGO MOBILE: Estilo AA.com 👇 */}
+          <Link href="/" className="text-2xl font-extrabold tracking-tight flex items-end">
+            <span className="text-red-600">A</span>
+            <span className="text-blue-600">A</span>
+            <span className="text-slate-900 text-base mb-[2px]">.com</span>
           </Link>
 
           <div className="flex items-center gap-3">

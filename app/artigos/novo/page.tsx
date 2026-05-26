@@ -15,17 +15,34 @@ export default function NovoArtigo() {
   const [capaPrevia, setCapaPrevia] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   
+  // ✨ NOVO ESTADO: Controla o balão bonitinho
+  const [toast, setToast] = useState<{ visivel: boolean; mensagem: string; tipo: 'sucesso' | 'erro' | 'aviso' }>({
+    visivel: false,
+    mensagem: "",
+    tipo: "sucesso"
+  });
+  
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ✨ NOVA FUNÇÃO: Dispara o balão na tela
+  const mostrarToast = (mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso') => {
+    setToast({ visivel: true, mensagem, tipo });
+    // Esconde automaticamente após 3 segundos
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, visivel: false }));
+    }, 3000);
+  };
 
   // Verificar se está logado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
-        alert("Você precisa estar logado para escrever um artigo!");
-        router.push('/');
+        mostrarToast("Você precisa estar logado para escrever um artigo!", "aviso");
+        setTimeout(() => router.push('/'), 2000); // Espera o usuário ler antes de redirecionar
+      } else {
+        setUser(currentUser);
       }
-      setUser(currentUser);
     });
     return () => unsubscribe();
   }, [router]);
@@ -41,18 +58,16 @@ export default function NovoArtigo() {
   const salvarArtigo = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ✨ ATUALIZADO: Agora só exige Título e Texto (Capa não é mais obrigatória)
     if (!user || !titulo || !texto) {
-      alert("Por favor, preencha o título e o texto do artigo!");
+      mostrarToast("Por favor, preencha o título e o texto do artigo!", "aviso");
       return;
     }
 
     setEnviando(true);
 
     try {
-      let urlCapa = ""; // Começa vazio
+      let urlCapa = "";
 
-      // ✨ ATUALIZADO: Só tenta fazer upload se o usuário escolheu um arquivo
       if (capaArquivo) {
         const nomeArquivo = `${Date.now()}_${user.uid}`;
         const storageRef = ref(storage, `artigos/${nomeArquivo}`);
@@ -60,11 +75,10 @@ export default function NovoArtigo() {
         urlCapa = await getDownloadURL(storageRef);
       }
 
-      // 2. Salva os dados no Firestore (Coleção: artigos)
       await addDoc(collection(db, "artigos"), {
         titulo: titulo,
         texto: texto,
-        capaUrl: urlCapa, // Vai enviar a URL da imagem OU ficará vazio ("")
+        capaUrl: urlCapa,
         autorNome: user.displayName || "Professor(a)",
         autorAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`,
         autorId: user.uid,
@@ -73,24 +87,48 @@ export default function NovoArtigo() {
         comentariosCount: 0
       });
 
-      alert("Artigo publicado com sucesso!");
-      router.push('/'); // Volta para a página inicial
+      mostrarToast("Artigo publicado com sucesso! 🎉", "sucesso");
+      
+      // ✨ Espera 2 segundos para o usuário ver o balão de sucesso antes de ir pra home
+      setTimeout(() => {
+        router.push('/'); 
+      }, 2000);
+
     } catch (error) {
       console.error("Erro ao salvar artigo:", error);
-      alert("Ocorreu um erro ao salvar o artigo.");
+      mostrarToast("Ocorreu um erro ao salvar o artigo.", "erro");
     } finally {
       setEnviando(false);
     }
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen relative">
+      
+      {/* ✨ O BALÃO BONITINHO (TOAST) ✨ */}
+      <div 
+        className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
+          toast.visivel ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10 pointer-events-none"
+        }`}
+      >
+        <div className={`px-6 py-3 rounded-full shadow-xl font-bold flex items-center gap-2 text-white
+          ${toast.tipo === 'sucesso' ? 'bg-green-500' : ''}
+          ${toast.tipo === 'erro' ? 'bg-red-500' : ''}
+          ${toast.tipo === 'aviso' ? 'bg-orange-500' : ''}
+        `}>
+          {toast.tipo === 'sucesso' && '✅'}
+          {toast.tipo === 'erro' && '❌'}
+          {toast.tipo === 'aviso' && '⚠️'}
+          {toast.mensagem}
+        </div>
+      </div>
+
       {/* Cabeçalho */}
       <div className="bg-white border-b border-slate-200 p-4 sticky top-0 z-10">
         <div className="container mx-auto max-w-3xl flex items-center justify-between">
           <button onClick={() => router.back()} className="text-slate-500 font-bold hover:text-purple-600 transition-colors">Cancelar</button>
           <h1 className="font-bold text-lg text-purple-900">Escrever Artigo</h1>
-          <div className="w-16"></div> {/* Espaçador para centralizar o título */}
+          <div className="w-16"></div>
         </div>
       </div>
 
@@ -152,9 +190,15 @@ export default function NovoArtigo() {
             <button 
               type="submit"
               disabled={enviando}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-purple-200 transition-all disabled:bg-slate-300 disabled:shadow-none text-lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-purple-200 transition-all disabled:bg-slate-300 disabled:shadow-none text-lg flex items-center gap-2"
             >
-              {enviando ? "Publicando..." : "Publicar Artigo"}
+              {enviando ? (
+                <>
+                  <span className="animate-spin text-xl">⏳</span> Publicando...
+                </>
+              ) : (
+                "Publicar Artigo"
+              )}
             </button>
           </div>
         </form>

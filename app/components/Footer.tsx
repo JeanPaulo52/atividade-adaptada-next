@@ -3,7 +3,9 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400 py-16 mt-20">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
+        
+        {/* Coluna 1: Logo e Descrição */}
         <div>
           <div className="text-2xl font-extrabold tracking-tight flex gap-1 mb-4">
             <span className="text-red-500">Atividade</span>
@@ -14,6 +16,7 @@ export default function Footer() {
           </p>
         </div>
 
+        {/* Coluna 2: Navegação Principal */}
         <div>
           <h4 className="text-white font-bold mb-6 text-lg">Navegação</h4>
           <ul className="space-y-3 text-sm font-medium">
@@ -23,6 +26,18 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* 👇 NOVA Coluna 3: Institucional (Ajustada com as rotas corretas) 👇 */}
+        <div>
+          <h4 className="text-white font-bold mb-6 text-lg">Institucional</h4>
+          <ul className="space-y-3 text-sm font-medium">
+            <li><Link href="/sobre" className="hover:text-blue-400 transition-colors">Sobre Nós</Link></li>
+            <li><Link href="/contato" className="hover:text-blue-400 transition-colors">Contato</Link></li>
+            <li><Link href="/privacidade" className="hover:text-blue-400 transition-colors">Política de Privacidade</Link></li>
+            <li><Link href="/termos" className="hover:text-blue-400 transition-colors">Termos de Uso</Link></li>
+          </ul>
+        </div>
+
+        {/* Coluna 4: Redes Sociais */}
         <div>
           <h4 className="text-white font-bold mb-6 text-lg">Acompanhe</h4>
           <p className="text-sm mb-4">Siga nossas redes sociais para receber novos materiais gratuitos.</p>
@@ -32,8 +47,10 @@ export default function Footer() {
              <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-blue-600 text-white cursor-pointer transition-colors font-bold">Ig</div>
           </div>
         </div>
+        
       </div>
-      <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm">
+      
+      <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm flex flex-col md:flex-row justify-center items-center gap-4">
         <p>&copy; {new Date().getFullYear()} Atividade Adaptada. Todos os direitos reservados.</p>
       </div>
     </footer>

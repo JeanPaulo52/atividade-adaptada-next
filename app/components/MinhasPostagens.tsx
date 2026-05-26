@@ -36,20 +36,38 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
     }
   }, [perfilId]);
 
+  // Função para converter datas de qualquer formato
+  const converterData = (item: any) => {
+    const data = item?.dataCriacao || item?.createdAt || item?.timestamp || item?.data;
+    
+    if (!data) return 0;
+    if (typeof data === 'string') return new Date(data).getTime();
+    if (typeof data.toMillis === 'function') return data.toMillis();
+    if (data.seconds) return data.seconds * 1000;
+    
+    return new Date(data).getTime();
+  };
+
   const buscarTudo = async (uid: string) => {
     setLoading(true);
     try {
-      // Buscar Atividades
+      // 1. Buscar Atividades
       const qAtiv = query(collection(db, "atividades"), where("autorId", "==", uid));
       const snapAtiv = await getDocs(qAtiv);
-      setAtividades(snapAtiv.docs.map(d => ({ id: d.id, tipo: 'atividade', colecaoNome: 'atividades', ...d.data() })));
+      const listaAtiv = snapAtiv.docs.map(d => ({ id: d.id, tipo: 'atividade', colecaoNome: 'atividades', ...d.data() }));
 
-      // Buscar Artigos
+      listaAtiv.sort((a: any, b: any) => converterData(b) - converterData(a));
+      setAtividades(listaAtiv);
+
+      // 2. Buscar Artigos
       const qArt = query(collection(db, "artigos"), where("autorId", "==", uid));
       const snapArt = await getDocs(qArt);
-      setArtigos(snapArt.docs.map(d => ({ id: d.id, tipo: 'artigo', colecaoNome: 'artigos', ...d.data() })));
+      const listaArt = snapArt.docs.map(d => ({ id: d.id, tipo: 'artigo', colecaoNome: 'artigos', ...d.data() }));
 
-      // Buscar Momentos (nas 3 variações possíveis)
+      listaArt.sort((a: any, b: any) => converterData(b) - converterData(a));
+      setArtigos(listaArt);
+
+      // 3. Buscar Momentos
       let listaM: any[] = [];
       for (const col of ["postagens", "momentos", "postagem"]) {
         const qM = query(collection(db, col), where("autorId", "==", uid));
@@ -58,8 +76,11 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
           listaM.push({ id: doc.id, tipo: 'momento', colecaoNome: col, ...doc.data() });
         });
       }
-      // Remover duplicatas por ID
-      setMomentos(listaM.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i));
+      
+      let momentosUnicos = listaM.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+      
+      momentosUnicos.sort((a: any, b: any) => converterData(b) - converterData(a));
+      setMomentos(momentosUnicos);
 
     } catch (error) {
       console.error("Erro ao carregar postagens:", error);
@@ -68,30 +89,24 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
     }
   };
 
-  // Função que apenas abre o modal
   const handleExcluir = (id: string, colecaoNome: string, tipo: string) => {
     setItemToDelete({ id, colecaoNome, tipo });
   };
 
-  // Função que realmente exclui quando o usuário confirma
   const confirmDelete = async () => {
     if (!itemToDelete) return;
-    
     const { id, colecaoNome, tipo } = itemToDelete;
-
     try {
       await deleteDoc(doc(db, colecaoNome, id));
-      
       if (tipo === 'atividade') setAtividades(prev => prev.filter(p => p.id !== id));
       if (tipo === 'artigo') setArtigos(prev => prev.filter(p => p.id !== id));
       if (tipo === 'momento') setMomentos(prev => prev.filter(p => p.id !== id));
-      
       setToast({ message: "Postagem excluída com sucesso!", type: "info" });
     } catch (e) { 
       console.error(e); 
       setToast({ message: "Erro ao excluir postagem.", type: "error" });
     } finally {
-      setItemToDelete(null); // Fecha o modal após a ação
+      setItemToDelete(null);
     }
   };
 
@@ -109,7 +124,9 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
           if (post.tipo === 'artigo') linkDestino = `/artigos/${post.id}`;
           if (post.tipo === 'momento') linkDestino = `/postagem/${post.id}`;
 
-          let imagemCapa = post.imagemUrl || post.imageUrl || post.url || (Array.isArray(post.imagens) ? post.imagens[0] : null);
+          // ✨ O SEGREDO ESTÁ AQUI: Adicionei "capa", "capaUrl", "imagemCapa", "image" na busca
+          let imagemCapa = post.capa || post.capaUrl || post.imagemCapa || post.imagemUrl || post.imageUrl || post.url || post.image || (Array.isArray(post.imagens) ? post.imagens[0] : null);
+          
           const tituloPost = post.titulo || post.descricao || post.texto || "Sem título";
           const likes = post.totalFavoritos ?? post.likes ?? 0;
 
@@ -147,7 +164,6 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
 
   return (
     <div className="mt-12 relative">
-      {/* Navegação por Abas */}
       <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-100 pb-4">
         {[
           { id: 'atividades', label: 'Atividades', icon: 'exercise', count: atividades.length },
@@ -172,25 +188,22 @@ export default function MinhasPostagens({ perfilId, nomeUsuario }: { perfilId: s
         ))}
       </div>
 
-      {/* Conteúdo da Aba Selecionada */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         {abaAtiva === 'atividades' && renderGrid(atividades)}
         {abaAtiva === 'artigos' && renderGrid(artigos)}
         {abaAtiva === 'momentos' && renderGrid(momentos)}
       </div>
 
-      {/* RENDERIZA O MODAL DE CONFIRMAÇÃO */}
       <ConfirmModal 
         isOpen={itemToDelete !== null}
         title="Excluir Permanentemente?"
-        message="Tem certeza de que deseja excluir esta postagem? Essa ação não poderá ser desfeita e os dados serão perdidos para sempre."
+        message="Tem certeza de que deseja excluir esta postagem? Essa ação não poderá ser desfeita."
         confirmText="Sim, Excluir"
         cancelText="Cancelar"
         onConfirm={confirmDelete}
         onCancel={() => setItemToDelete(null)}
       />
 
-      {/* RENDERIZA O TOAST */}
       {toast && (
         <Toast 
           message={toast.message} 

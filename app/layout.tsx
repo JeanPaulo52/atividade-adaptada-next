@@ -5,7 +5,7 @@ import './globals.css';
 import { AuthProvider } from './context/AuthContext'; 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import AuthCookieHelper from './components/AuthCookieHelper'; // 👈 1. IMPORTAMOS AQUI
+import AuthCookieHelper from './components/AuthCookieHelper'; 
 
 const nunito = Nunito({ 
   subsets: ['latin'], 
@@ -13,10 +13,52 @@ const nunito = Nunito({
   display: 'swap',
 });
 
+// === INÍCIO DO SEO TURBINADO ===
 export const metadata: Metadata = {
-  title: 'Atividade Adaptada | Materiais para Professores',
-  description: 'A maior plataforma de atividades e recursos adaptados para educadores.',
+  // A URL real do seu projeto em produção
+  metadataBase: new URL('https://www.atividadeadaptada.com.br'), 
+  
+  title: {
+    default: 'Atividade Adaptada | Materiais para Professores',
+    template: '%s | Atividade Adaptada', 
+  },
+  description: 'A maior plataforma de atividades e recursos adaptados para educadores. Facilite o ensino e a inclusão com materiais didáticos de alta qualidade.',
+  keywords: ['atividades adaptadas', 'educação especial', 'inclusão', 'materiais didáticos', 'professores', 'atividades pedagógicas', 'educação inclusiva'],
+  
+  openGraph: {
+    title: 'Atividade Adaptada | Materiais para Professores',
+    description: 'A maior plataforma de atividades e recursos adaptados para educadores.',
+    url: '/',
+    siteName: 'Atividade Adaptada',
+    locale: 'pt_BR',
+    type: 'website',
+    images: [
+      {
+        url: '/imagem-compartilhamento.jpg', 
+        width: 1200,
+        height: 630,
+        alt: 'Capa do site Atividade Adaptada',
+      },
+    ],
+  },
+  
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  
+  alternates: {
+    canonical: '/',
+  },
 };
+// === FIM DO SEO TURBINADO ===
 
 export default function RootLayout({
   children,
@@ -87,7 +129,6 @@ export default function RootLayout({
         </noscript>
 
         <AuthProvider>
-          {/* 👈 2. COLOCAMOS ELE AQUI PARA RODAR NO FUNDO */}
           <AuthCookieHelper /> 
           
           <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">

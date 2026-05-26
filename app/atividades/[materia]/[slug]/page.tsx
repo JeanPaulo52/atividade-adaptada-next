@@ -5,6 +5,7 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { cache } from 'react'; // ✨ IMPORTAÇÃO DO CACHE ADICIONADA AQUI
 import CarrosselImagens from '../../../components/CarrosselImagens';
 import BotaoFavorito from '../../../components/BotaoFavorito';
 import Comentarios from '../../../components/Comentarios';
@@ -15,7 +16,8 @@ import BotaoDownload from '../../../components/BotaoDownload';
 import { db } from '../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-async function getAtividadeData(materia: string, paramSlug: string) {
+// ✨ FUNÇÃO ENVOLVIDA PELO CACHE PARA ECONOMIZAR LEITURAS NO BANCO
+const getAtividadeData = cache(async (materia: string, paramSlug: string) => {
   // 🔥 O SEGREDO AQUI: Limpa a URL de caracteres como %20 ou %C3
   const slug = decodeURIComponent(paramSlug);
   
@@ -96,8 +98,8 @@ async function getAtividadeData(materia: string, paramSlug: string) {
         contentHtml: descFormatada,
         titulo: data.titulo || "Sem Título",
         descricao: data.descricao || "",
-        imagens: data.imagemUrl ? [data.imagemUrl] : [],
-        pdf: null, // Deixamos null pois não tem PDF, será baixada a imagem
+        imagens: data.imagens || (data.imagemUrl ? [data.imagemUrl] : []),
+        pdf: data.pdf || null,
         idade: data.idade || null,
         habilidades: data.habilidades || null,
         materiais: data.materiais || null,
@@ -115,7 +117,7 @@ async function getAtividadeData(materia: string, paramSlug: string) {
 
   // 3. SE NÃO ACHOU EM LUGAR NENHUM
   return { erro: true };
-}
+});
 
 export async function generateMetadata({ params }: { params: Promise<{ materia: string; slug: string }> }): Promise<Metadata> {
   const { materia, slug } = await params;
@@ -127,6 +129,7 @@ export async function generateMetadata({ params }: { params: Promise<{ materia: 
     description: atividade.descricao,
     openGraph: {
       title: atividade.titulo,
+      description: atividade.descricao, // ✨ DESCRIÇÃO ADICIONADA AQUI PARA COMPARTILHAMENTO
       images: atividade.imagens.length > 0 ? [atividade.imagens[0]] : [], 
     }
   };
