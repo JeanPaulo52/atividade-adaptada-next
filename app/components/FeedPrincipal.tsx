@@ -18,6 +18,17 @@ const formatarNomeMateria = (materia: string) => {
   return nomesEspeciais[materia] || materia.charAt(0).toUpperCase() + materia.slice(1);
 };
 
+// ✨ TRADUTOR UNIVERSAL DE DATAS ✨
+// Esta função garante que qualquer tipo de data vinda do Firebase seja lida corretamente
+const extrairData = (campoData: any) => {
+  if (!campoData) return 0; // Se não tiver data, vai pro fim da fila
+  if (campoData.seconds) return campoData.seconds * 1000; // Timestamp do Firebase
+  if (typeof campoData === 'number') return campoData; // Se já for milissegundos
+  if (typeof campoData === 'string') return new Date(campoData).getTime(); // Se for texto (ex: "2024-05-01")
+  if (campoData.toMillis) return campoData.toMillis(); // Outro formato do Firebase
+  return 0;
+};
+
 export default function FeedPrincipal({ 
   itensLocais = [], 
   modoPesquisa = false 
@@ -27,7 +38,6 @@ export default function FeedPrincipal({
 }) {
   const [feedCompleto, setFeedCompleto] = useState<any[]>(itensLocais);
 
-  // ✨ CONTROLE INTELIGENTE DE ANÚNCIOS ✨
   const INTERVALO_DE_ANUNCIOS = 12;
   const LIMITE_MAXIMO_ANUNCIOS = 4;
 
@@ -53,51 +63,46 @@ export default function FeedPrincipal({
         new Map(todosJuntos.map(item => [item.id || item.slug, item])).values()
       );
       
-      // 🚀 MOTOR DE RANKING (Lendo os favoritos e comentários reais!)
-      const feedInteligente = itensUnicos.sort((a, b) => {
-        // Usa os campos exatos que os seus componentes de curtida/comentário salvam
-        const engajamentoA = (a.curtidas || 0) + ((a.comentarios || 0) * 2);
-        const engajamentoB = (b.curtidas || 0) + ((b.comentarios || 0) * 2);
+      // ✅ ORDENAÇÃO CRONOLÓGICA PURA MISTURADA
+      const feedCronologico = itensUnicos.sort((a, b) => {
+        // Agora ele usa a data tratada que criamos lá no snapshot
+        const dataA = a.dataReal || 0;
+        const dataB = b.dataReal || 0;
 
-        const dataA = a.createdAt || a.dataCriacao || 0;
-        const dataB = b.createdAt || b.dataCriacao || 0;
-
-        // Cada engajamento dá +1 hora de sobrevida no topo do feed (3600000 ms)
-        const pontuacaoA = dataA + (engajamentoA * 3600000);
-        const pontuacaoB = dataB + (engajamentoB * 3600000);
-
-        return pontuacaoB - pontuacaoA; // Ordena da maior pontuação para a menor
+        return dataB - dataA; // O maior (mais novo) fica no topo, misturando todos
       });
       
-      setFeedCompleto(feedInteligente);
+      setFeedCompleto(feedCronologico);
     };
 
     const unsubAtiv = onSnapshot(qAtividades, (snap) => {
-      atividadesFB = snap.docs.map(doc => ({
-        id: doc.id, tipo: 'atividade',
-        materia: doc.data().materia || 'geral',
-        titulo: doc.data().titulo,
-        imagemCapa: doc.data().imagemUrl || doc.data().imagem,
-        isFirebase: true,
-        // 👇 Pegando os campos que descobrimos hoje
-        curtidas: doc.data().totalFavoritos || 0,
-        comentarios: doc.data().totalComentarios || 0,
-        createdAt: doc.data().createdAt?.seconds ? doc.data().createdAt.seconds * 1000 : Date.now()
-      }));
+      atividadesFB = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id, tipo: 'atividade',
+          materia: data.materia || 'geral',
+          titulo: data.titulo,
+          imagemCapa: data.imagemUrl || data.imagem,
+          isFirebase: true,
+          // Lendo a data corretamente com a nova função
+          dataReal: extrairData(data.createdAt || data.dataCriacao)
+        };
+      });
       combinarTudo();
     });
 
     const unsubArt = onSnapshot(qArtigos, (snap) => {
-      artigosFB = snap.docs.map(doc => ({
-        id: doc.id, tipo: 'artigo',
-        titulo: doc.data().titulo,
-        imagemCapa: doc.data().capaUrl || doc.data().imagemUrl || IMAGEM_PADRAO_ARTIGO,
-        autorNome: doc.data().autorNome || "Equipe",
-        isFirebase: true,
-        curtidas: doc.data().totalFavoritos || 0,
-        comentarios: doc.data().totalComentarios || 0,
-        createdAt: doc.data().createdAt?.seconds ? doc.data().createdAt.seconds * 1000 : Date.now()
-      }));
+      artigosFB = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id, tipo: 'artigo',
+          titulo: data.titulo,
+          imagemCapa: data.capaUrl || data.imagemUrl || IMAGEM_PADRAO_ARTIGO,
+          autorNome: data.autorNome || "Equipe",
+          isFirebase: true,
+          dataReal: extrairData(data.createdAt || data.dataCriacao)
+        };
+      });
       combinarTudo();
     });
 
@@ -126,9 +131,7 @@ export default function FeedPrincipal({
           autorNome: nomeFinal,
           autorAvatar: avatarFinal || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeFinal)}&background=random&color=fff`,
           autorId: data.autorId, isFirebase: true,
-          curtidas: data.totalFavoritos || 0,
-          comentarios: data.totalComentarios || 0,
-          createdAt: data.createdAt?.seconds ? data.createdAt.seconds * 1000 : Date.now()
+          dataReal: extrairData(data.createdAt || data.dataCriacao)
         };
       });
 
