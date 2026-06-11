@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../lib/firebase"; 
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
 import BotaoNovoPost from '../components/BotaoNovoPost'; 
 import BarraPesquisa from './BarraPesquisa'; 
@@ -70,18 +70,23 @@ export default function Navbar() {
             <span className="text-slate-900">.com</span>
           </Link>
 
-          {/* LINKS DESKTOP */}
+          {/* ✨ LINKS DESKTOP ATUALIZADOS ✨ */}
           <div className="flex items-center space-x-8">
+            {/* Raiz agora é a Biblioteca */}
             <Link href="/" className="relative font-bold text-slate-800 hover:text-blue-600 transition-colors group">
-              Início
+              Biblioteca
               <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
+            
+            {/* Nova rota da Comunidade */}
+            <Link href="/comunidade" className="relative font-medium text-slate-500 hover:text-blue-600 transition-colors group">
+              Comunidade
+              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
+            </Link>
+
+            {/* Atividades mantidas */}
             <Link href="/atividades" className="relative font-medium text-slate-500 hover:text-blue-600 transition-colors group">
               Atividades
-              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
-            </Link>
-            <Link href="/artigos" className="relative font-medium text-slate-500 hover:text-blue-600 transition-colors group">
-              Artigos
               <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
             
@@ -133,9 +138,8 @@ export default function Navbar() {
           </div>
         </nav>
 
-        {/* NAVEGAÇÃO DE TOPO MOBILE (Apenas Logo, Pesquisa e Ícones) */}
+        {/* NAVEGAÇÃO DE TOPO MOBILE */}
         <nav className="md:hidden flex justify-between items-center px-4 py-3">
-          {/* 👇 LOGO MOBILE: Estilo AA.com 👇 */}
           <Link href="/" className="text-2xl font-extrabold tracking-tight flex items-end">
             <span className="text-red-600">A</span>
             <span className="text-blue-600">A</span>
@@ -173,33 +177,30 @@ export default function Navbar() {
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-lg border-t border-slate-200/60 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
         <div className="flex justify-around items-center h-16 px-1 relative">
           
-          {/* 1. INÍCIO */}
+          {/* 1. BIBLIOTECA (Raiz - Substitui o "Início") */}
           <Link href="/" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
-            <span className="material-symbols-outlined text-[28px] group-hover:fill-current">home</span>
-            <span className="text-[10px] font-medium mt-0.5">Início</span>
+            <span className="material-symbols-outlined text-[28px] group-hover:fill-current">local_library</span>
+            <span className="text-[10px] font-medium mt-0.5">Biblioteca</span>
           </Link>
 
-          {/* 2. ATIVIDADES */}
-          <Link href="/atividades" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
-            <span className="material-symbols-outlined text-[28px]">extension</span>
-            <span className="text-[10px] font-medium mt-0.5">Atividades</span>
+          {/* 2. COMUNIDADE (Nova Rota) */}
+          <Link href="/comunidade" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
+            <span className="material-symbols-outlined text-[28px]">groups</span>
+            <span className="text-[10px] font-medium mt-0.5">Comunidade</span>
           </Link>
 
           {/* 3. BOTÃO POSTAR CENTRAL (FLUTUANTE) */}
           <div className="relative -top-6 flex justify-center items-center">
-            {/* Círculo branco de fundo para cortar a linha da Navbar */}
             <div className="absolute w-[72px] h-[72px] bg-white rounded-full shadow-[0_-4px_10px_rgba(0,0,0,0.04)] -z-10"></div>
-            
-            {/* Wrapper CSS Mágico: Esconde a palavra "POSTAR" e deixa o botão redondo */}
             <div className="[&_span.font-bold]:hidden [&_button]:w-[54px] [&_button]:h-[54px] [&_button]:p-0 [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:shadow-blue-500/40 [&_span.material-symbols-outlined]:text-[30px] [&_span.material-symbols-outlined]:m-0 active:scale-95 transition-transform">
               <BotaoNovoPost />
             </div>
           </div>
 
-          {/* 4. ARTIGOS */}
-          <Link href="/artigos" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
-            <span className="material-symbols-outlined text-[28px]">article</span>
-            <span className="text-[10px] font-medium mt-0.5">Artigos</span>
+          {/* 4. ATIVIDADES */}
+          <Link href="/atividades" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
+            <span className="material-symbols-outlined text-[28px]">extension</span>
+            <span className="text-[10px] font-medium mt-0.5">Atividades</span>
           </Link>
 
           {/* 5. PERFIL */}

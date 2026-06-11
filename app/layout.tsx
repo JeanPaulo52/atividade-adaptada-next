@@ -116,7 +116,8 @@ export default function RootLayout({
         />
       </head>
 
-      <body className={`${nunito.variable} font-nunito bg-slate-50 text-gray-800 min-h-screen flex flex-col`}>
+      {/* 👇 AQUI ACONTECE A MÁGICA VISUAL: bg-slate-50, text-slate-800 e antialiased */}
+      <body className={`${nunito.variable} font-nunito bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col`}>
         
         {/* GTM NOSCRIPT */}
         <noscript>
@@ -131,6 +132,7 @@ export default function RootLayout({
         <AuthProvider>
           <AuthCookieHelper /> 
           
+          {/* Header limpo e flutuante */}
           <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
             <Navbar />
           </header>
