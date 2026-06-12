@@ -6,13 +6,14 @@ import { collection, query, onSnapshot } from 'firebase/firestore';
 import Link from 'next/link';
 import AdCard from './AdCard';
 
+// ✨ 1. AQUI: Adicionamos o modoPesquisa na interface para o TypeScript parar de reclamar
 interface FeedBibliotecaProps {
   itensLocais?: any[];
+  modoPesquisa?: boolean;
 }
 
 const IMAGEM_PADRAO_ARTIGO = "https://placehold.co/600x600/e2e8f0/475569?text=Artigo";
 
-// 👇 Função atualizada com todos os IDs oficiais do seu sistema
 const formatarNomeMateria = (materia: string) => {
   if (!materia) return 'Geral / Multidisciplinar';
   
@@ -51,7 +52,6 @@ const extrairData = (campoData: any) => {
   return 0;
 };
 
-// 🌟 CATEGORIAS ORGANIZADAS (Principais primeiro, depois em ordem alfabética)
 const CATEGORIAS = [
   "Todos",
   "Atividades",
@@ -77,7 +77,8 @@ const CATEGORIAS = [
   "Sociologia"
 ];
 
-export default function FeedBiblioteca({ itensLocais }: FeedBibliotecaProps) {
+// ✨ 2. AQUI: Recebemos o modoPesquisa como parâmetro (com valor falso por padrão)
+export default function FeedBiblioteca({ itensLocais, modoPesquisa = false }: FeedBibliotecaProps) {
   const [materiais, setMateriais] = useState<any[]>([]);
   const [filtroAtivo, setFiltroAtivo] = useState<string>('Todos');
   const [limiteVisivel, setLimiteVisivel] = useState(15);
@@ -91,9 +92,21 @@ export default function FeedBiblioteca({ itensLocais }: FeedBibliotecaProps) {
   const LIMITE_MAXIMO_ANUNCIOS = 2;
 
   useEffect(() => {
+    // ✨ 3. AQUI: Se for modo pesquisa, nós confiamos SOMENTE no que a página enviou
+    // e cancelamos qualquer busca no banco de dados.
+    if (modoPesquisa) {
+      const itensSeguros = itensLocais || [];
+      const apenasBiblioteca = itensSeguros.filter(item => item.tipo === 'atividade' || item.tipo === 'artigo');
+      setMateriais(apenasBiblioteca);
+      setStatusCarregamento({ ativ: true, art: true }); // Avisa que terminou de carregar
+      return; 
+    }
+
+    // Comportamento normal se tiver itens locais (ex: renderização no servidor normal)
     if (itensLocais && itensLocais.length > 0) {
       const apenasBiblioteca = itensLocais.filter(item => item.tipo === 'atividade' || item.tipo === 'artigo');
       setMateriais(apenasBiblioteca);
+      setStatusCarregamento({ ativ: true, art: true });
       return; 
     }
 
@@ -138,7 +151,7 @@ export default function FeedBiblioteca({ itensLocais }: FeedBibliotecaProps) {
     });
 
     return () => { unsubAtiv(); unsubArt(); };
-  }, [itensLocais]);
+  }, [itensLocais, modoPesquisa]); // ✨ Adicionado modoPesquisa nas dependências
 
   useEffect(() => {
     const lidarComEventos = () => {

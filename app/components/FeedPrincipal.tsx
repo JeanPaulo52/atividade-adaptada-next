@@ -22,6 +22,9 @@ export default function FeedPrincipal({
   // 🚀 NOVO: Controle de renderização em lotes
   const [limiteVisivel, setLimiteVisivel] = useState(10);
   
+  // 🚀 NOVO: Controle de quais posts estão com o texto expandido ("Ler mais")
+  const [postsExpandidos, setPostsExpandidos] = useState<string[]>([]);
+  
   // Estados para controle dos comentários
   const [postAbertoId, setPostAbertoId] = useState<string | null>(null);
   const [comentarios, setComentarios] = useState<any[]>([]);
@@ -68,7 +71,7 @@ export default function FeedPrincipal({
         return {
           id: documento.id, 
           tipo: 'momento',
-          descricao: data.descricao,
+          descricao: data.descricao || "", // Garantindo que não seja null
           imagens: data.imagens || [],
           autorNome: nomeFinal,
           autorAvatar: avatarFinal || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeFinal)}&background=random&color=fff`,
@@ -192,6 +195,15 @@ export default function FeedPrincipal({
     setEnviandoComentario(false);
   };
 
+  // 🚀 NOVO: Função para expandir/recolher o texto ("mais" e "menos")
+  const toggleTextoExpandido = (id: string) => {
+    setPostsExpandidos(prev => 
+      prev.includes(id) 
+        ? prev.filter(postId => postId !== id) // Remove da lista (recolhe)
+        : [...prev, id] // Adiciona na lista (expande)
+    );
+  };
+
   // 🚀 PREPARAÇÃO DOS DADOS VISÍVEIS + INJEÇÃO DE ANÚNCIOS
   const momentosVisiveis = feedMomentos.slice(0, limiteVisivel);
   const feedComAnuncios: any[] = [];
@@ -232,6 +244,11 @@ export default function FeedPrincipal({
             </div>
           );
         }
+
+        // LÓGICA DO TEXTO LONGO (Corte em 100 caracteres)
+        const limiteCaracteres = 100;
+        const textoLongo = item.descricao && item.descricao.length > limiteCaracteres;
+        const textoEstaExpandido = postsExpandidos.includes(item.id);
 
         // Renderiza a postagem normal
         return (
@@ -280,10 +297,25 @@ export default function FeedPrincipal({
                 </button>
               </div>
 
-              <p className="text-sm text-slate-800 leading-relaxed break-words mt-2">
+              {/* 👇 AQUI ACONTECE A MÁGICA DO TEXTO (Mais / Menos) */}
+              <div className="text-sm text-slate-800 leading-relaxed break-words mt-2">
                 <span className="font-bold mr-2">{item.autorNome}</span>
-                {item.descricao}
-              </p>
+                
+                {!textoLongo || textoEstaExpandido ? (
+                  <span>{item.descricao}</span>
+                ) : (
+                  <span>{item.descricao.substring(0, limiteCaracteres)}...</span>
+                )}
+
+                {textoLongo && (
+                  <button 
+                    onClick={() => toggleTextoExpandido(item.id)} 
+                    className="text-slate-500 font-medium ml-1 hover:text-slate-800 focus:outline-none"
+                  >
+                    {textoEstaExpandido ? 'menos' : 'mais'}
+                  </button>
+                )}
+              </div>
 
               {item.comentarios > 0 && (
                 <button onClick={() => setPostAbertoId(item.id)} className="text-slate-500 text-xs mt-2 font-semibold hover:underline">

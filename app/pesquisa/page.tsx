@@ -1,10 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import FeedPrincipal from '../components/FeedPrincipal';
+import FeedBiblioteca from '../components/FeedBiblioteca'; // 👈 IMPORTANTE: Verifique se o caminho do FeedBiblioteca está correto!
 import { db } from '../lib/firebase';
-// ✨ ADICIONAMOS 'doc' e 'getDoc' AQUI também!
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +14,7 @@ function getConteudoLocal() {
   const atividadesPath = path.join(process.cwd(), 'conteudo/atividades');
   if (fs.existsSync(atividadesPath)) {
     const materias = fs.readdirSync(atividadesPath);
-    materias.forEach(materia => {
+     materias.forEach(materia => {
       const materiaPath = path.join(atividadesPath, materia);
       if (fs.statSync(materiaPath).isDirectory()) {
         const files = fs.readdirSync(materiaPath);
@@ -67,8 +66,8 @@ function getConteudoLocal() {
 async function getConteudoFirebase() {
   const itens: any[] = [];
   try {
+    // 📄 Puxando Atividades do Firebase
     const snapAtividades = await getDocs(collection(db, "atividades"));
-    // Trocamos 'doc' por 'documento' aqui para não dar conflito com a função doc() do Firebase
     snapAtividades.forEach(documento => {
       const d = documento.data();
       itens.push({
@@ -85,6 +84,7 @@ async function getConteudoFirebase() {
       });
     });
 
+    // 📰 Puxando Artigos do Firebase
     const snapArtigos = await getDocs(collection(db, "artigos"));
     snapArtigos.forEach(documento => {
       const d = documento.data();
@@ -101,45 +101,7 @@ async function getConteudoFirebase() {
       });
     });
 
-    // ✨ MAGIA AQUI TAMBÉM: Agora a pesquisa busca a foto do autor!
-    const snapMomentos = await getDocs(collection(db, "momentos"));
-    const promessasMomentos = snapMomentos.docs.map(async (documento) => {
-      const d = documento.data();
-      let nomeFinal = d.autorNome || "Professor(a)";
-      let avatarFinal = d.autorAvatar || null;
-
-      if (d.autorId) {
-        try {
-          const userRef = doc(db, "users", d.autorId);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            nomeFinal = userData.nome || userData.displayName || nomeFinal;
-            avatarFinal = userData.fotoUrl || userData.photoURL || avatarFinal;
-          }
-        } catch (e) {
-          console.error("Erro ao buscar perfil na pesquisa:", e);
-        }
-      }
-
-      return {
-        tipo: 'momento',
-        id: documento.id,
-        slug: documento.id,
-        descricao: d.descricao || d.texto || "",
-        imagens: d.imagens || (d.imagemUrl ? [d.imagemUrl] : []),
-        autorNome: nomeFinal,
-        // Garante que se não tiver foto de jeito nenhum, coloca as iniciais como antes!
-        autorAvatar: avatarFinal || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeFinal)}&background=random&color=fff`,
-        autorId: d.autorId,
-        isFirebase: true,
-        dataCriacao: d.createdAt?.seconds ? d.createdAt.seconds * 1000 : Date.now()
-      };
-    });
-
-    // Esperamos todos os momentos buscarem as fotos e então juntamos com os itens
-    const momentosResolvidos = await Promise.all(promessasMomentos);
-    itens.push(...momentosResolvidos);
+    // 🛑 REMOVIDO: A busca pela coleção "momentos" foi retirada daqui para focar apenas na biblioteca!
 
   } catch (error) {
     console.error("Erro ao buscar no Firebase:", error);
@@ -197,7 +159,8 @@ export default async function PesquisaPage({ searchParams }: any) {
 
       <main className="container mx-auto px-4 md:px-6 max-w-[1400px]">
         {itensFiltrados.length > 0 ? (
-          <FeedPrincipal itensLocais={itensFiltrados} modoPesquisa={true} />
+          /* 🔥 TROCADO: Mudamos de FeedPrincipal para FeedBiblioteca e injetamos a lista de itens locais/filtrados */
+          <FeedBiblioteca itensLocais={itensFiltrados} modoPesquisa={true} />
         ) : (
           <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200 max-w-3xl mx-auto mt-8">
             <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">
