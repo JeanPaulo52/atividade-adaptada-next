@@ -5,42 +5,29 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { cache } from 'react'; // ✨ IMPORTAÇÃO DO CACHE ADICIONADA AQUI
+import { cache } from 'react'; 
 import CarrosselImagens from '../../../components/CarrosselImagens';
-import BotaoFavorito from '../../../components/BotaoFavorito';
-import Comentarios from '../../../components/Comentarios';
-import BotaoCompartilhar from '../../../components/BotaoCompartilhar';
 import BotaoDownload from '../../../components/BotaoDownload'; 
+import InteracoesAtividade from '../../../components/InteracoesAtividade'; // O NOSSO NOVO COMPONENTE
 
 // === IMPORTAÇÕES DO FIREBASE ===
 import { db } from '../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-// ✨ FUNÇÃO ENVOLVIDA PELO CACHE PARA ECONOMIZAR LEITURAS NO BANCO
 const getAtividadeData = cache(async (materia: string, paramSlug: string) => {
-  // 🔥 O SEGREDO AQUI: Limpa a URL de caracteres como %20 ou %C3
   const slug = decodeURIComponent(paramSlug);
   
-  console.log(`🔎 Buscando atividade: Materia [${materia}], Slug [${slug}]`);
-
-  // 1. TENTA BUSCAR NO ARQUIVO LOCAL (.md)
   try {
     const fullPath = path.join(process.cwd(), 'conteudo/atividades', materia, `${slug}.md`);
     if (fs.existsSync(fullPath)) {
       const fileContents = fs.readFileSync(fullPath, 'utf8');
       const { data, content } = matter(fileContents);
-      
       const processedContent = await remark().use(html).process(content);
       const contentHtml = processedContent.toString();
-
       const imagensLista = data.imagens || (data.imagem ? [data.imagem] : []);
 
-      console.log(`✅ Encontrado LOCALMENTE (.md): ${slug}`);
-
       return {
-        slug,
-        materia,
-        contentHtml,
+        slug, materia, contentHtml,
         titulo: data.titulo || "Atividade Sem Título",
         descricao: data.descricao || "",
         imagens: imagensLista,
@@ -53,69 +40,46 @@ const getAtividadeData = cache(async (materia: string, paramSlug: string) => {
         erro: false
       };
     }
-  } catch (e) {
-    // Arquivo não existe localmente, seguimos a vida
-  }
+  } catch (e) {}
 
-  // 2. SE NÃO ACHOU LOCAL, BUSCA NO FIREBASE
   try {
-    // 🔥 Remove o "fb-" do slug se ele existir, para pegar o ID real do banco!
     const firebaseId = slug.startsWith('fb-') ? slug.replace('fb-', '') : slug;
-    
     const docRef = doc(db, "atividades", firebaseId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log(`🔥 Encontrado no FIREBASE: ${slug}`);
       const data = docSnap.data();
       const descFormatada = data.descricao ? `<p>${data.descricao.replace(/\n/g, '<br/>')}</p>` : '';
 
-      // Fallback inicial
       let autorFinal = {
         nome: data.autorNome || "Professor Parceiro",
         foto: data.autorAvatar || null
       };
 
-      // Busca dados atualizados do usuário
       if (data.autorId) {
         try {
           const userRef = doc(db, "users", data.autorId);
           const userSnap = await getDoc(userRef);
-          
           if (userSnap.exists()) {
             const userData = userSnap.data();
             autorFinal.nome = userData.nome || userData.displayName || autorFinal.nome;
             autorFinal.foto = userData.fotoUrl || userData.photoURL || autorFinal.foto;
           }
-        } catch (err) {
-          console.error("⚠️ Erro ao buscar perfil do autor:", err);
-        }
+        } catch (err) {}
       }
 
       return {
-        slug,
-        materia: data.materia || materia,
-        contentHtml: descFormatada,
-        titulo: data.titulo || "Sem Título",
-        descricao: data.descricao || "",
+        slug, materia: data.materia || materia, contentHtml: descFormatada,
+        titulo: data.titulo || "Sem Título", descricao: data.descricao || "",
         imagens: data.imagens || (data.imagemUrl ? [data.imagemUrl] : []),
-        pdf: data.pdf || null,
-        idade: data.idade || null,
-        habilidades: data.habilidades || null,
-        materiais: data.materiais || null,
-        autorId: data.autorId || null,
-        autorNome: autorFinal.nome, 
-        autorFoto: autorFinal.foto, 
-        erro: false
+        pdf: data.pdf || null, idade: data.idade || null,
+        habilidades: data.habilidades || null, materiais: data.materiais || null,
+        autorId: data.autorId || null, autorNome: autorFinal.nome, 
+        autorFoto: autorFinal.foto, erro: false
       };
-    } else {
-       console.log(`❌ Não encontrado no Firebase. O ID ${slug} realmente existe lá?`);
     }
-  } catch (e) {
-    console.error("🔥 Erro catastrófico ao buscar no Firebase:", e);
-  }
+  } catch (e) {}
 
-  // 3. SE NÃO ACHOU EM LUGAR NENHUM
   return { erro: true };
 });
 
@@ -129,7 +93,7 @@ export async function generateMetadata({ params }: { params: Promise<{ materia: 
     description: atividade.descricao,
     openGraph: {
       title: atividade.titulo,
-      description: atividade.descricao, // ✨ DESCRIÇÃO ADICIONADA AQUI PARA COMPARTILHAMENTO
+      description: atividade.descricao, 
       images: atividade.imagens.length > 0 ? [atividade.imagens[0]] : [], 
     }
   };
@@ -149,77 +113,43 @@ export default async function AtividadePage({ params }: { params: Promise<{ mate
 
   const nomeMateria = materia.charAt(0).toUpperCase() + materia.slice(1).replace('-', ' ');
   const imagemCapa = atividade.imagens.length > 0 ? atividade.imagens[0] : "";
-
-  // =========================================================================
-  // MINI-COMPONENTES
-  // =========================================================================
-
-  const CartaoAutor = ({ className = "" }: { className?: string }) => {
-    const nome = atividade.autorNome || "Professor Parceiro";
-    const foto = atividade.autorFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=random&color=fff`;
-    
-    const perfilUrl = atividade.autorId ? `/profile/${atividade.autorId}` : "#";
-
-    return (
-      <Link 
-        href={perfilUrl}
-        className={`bg-white rounded-3xl border-2 border-black p-5 flex items-center gap-4 shadow-sm transition-all hover:bg-slate-50 hover:border-blue-500 group ${className}`}
-      >
-        <img 
-          src={foto} 
-          alt={`Foto de ${nome}`} 
-          className="w-14 h-14 rounded-full object-cover border-2 border-slate-100 shadow-sm group-hover:scale-105 transition-transform"
-        />
-        
-        <div className="flex flex-col">
-          <span className="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-widest group-hover:text-blue-400 transition-colors">
-            Enviado por
-          </span>
-          <span className="text-base font-bold text-black leading-tight group-hover:text-blue-600 transition-colors">
-            {nome}
-          </span>
-        </div>
-
-        <span className="material-symbols-outlined ml-auto text-slate-300 group-hover:text-blue-500 transition-colors text-sm">
-          arrow_forward_ios
-        </span>
-      </Link>
-    );
-  };
+  const nomeAutor = atividade.autorNome || "Professor Parceiro";
+  const fotoAutor = atividade.autorFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeAutor)}&background=random&color=fff`;
+  const perfilUrl = atividade.autorId ? `/profile/${atividade.autorId}` : "#";
 
   const CartaoDetalhes = ({ className = "" }: { className?: string }) => (
-    <div className={`bg-white rounded-3xl border-2 border-black p-6 md:p-8 h-fit shadow-sm ${className}`}>
-      <h3 className="font-extrabold text-xl mb-6 text-black border-b-2 border-slate-100 pb-3">Detalhes</h3>
+    <div className={`bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-fit ${className}`}>
+      <h3 className="font-bold text-lg mb-5 text-slate-900 border-b border-slate-100 pb-3">Detalhes</h3>
       <div className="space-y-5 text-sm">
         {atividade.idade && (
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 border border-orange-200">
-              <span className="material-symbols-outlined text-orange-600 text-[20px]">face</span>
+            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 border border-slate-100">
+              <span className="material-symbols-outlined text-slate-600 text-[20px]">face</span>
             </div>
             <div>
-              <strong className="block text-black">Idade Recomendada</strong>
+              <strong className="block text-slate-900">Idade Recomendada</strong>
               <span className="text-slate-600">{atividade.idade}</span>
             </div>
           </div>
         )}
         {atividade.habilidades && (
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border border-blue-200">
-              <span className="material-symbols-outlined text-blue-600 text-[20px]">psychology</span>
+            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 border border-slate-100">
+              <span className="material-symbols-outlined text-slate-600 text-[20px]">psychology</span>
             </div>
             <div>
-              <strong className="block text-black">Habilidades</strong>
+              <strong className="block text-slate-900">Habilidades</strong>
               <span className="text-slate-600">{atividade.habilidades}</span>
             </div>
           </div>
         )}
         {atividade.materiais && (
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 border border-green-200">
-              <span className="material-symbols-outlined text-green-600 text-[20px]">architecture</span>
+            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 border border-slate-100">
+              <span className="material-symbols-outlined text-slate-600 text-[20px]">architecture</span>
             </div>
             <div>
-              <strong className="block text-black">Materiais</strong>
+              <strong className="block text-slate-900">Materiais</strong>
               <span className="text-slate-600">{atividade.materiais}</span>
             </div>
           </div>
@@ -231,81 +161,54 @@ export default async function AtividadePage({ params }: { params: Promise<{ mate
     </div>
   );
 
-  // =========================================================================
-  // RENDERIZAÇÃO DA PÁGINA
-  // =========================================================================
-
-  // ✨ Lógica para descobrir o que baixar
   const urlDownload = atividade.pdf || (atividade.imagens?.length > 0 ? atividade.imagens[0] : null);
   const ehPdf = !!atividade.pdf;
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-16">
-      <div className="container mx-auto px-4 md:px-6 pt-8 pb-4 text-sm text-slate-500 max-w-6xl">
+    <div className="bg-slate-50 min-h-screen pb-16 font-sans">
+      <div className="container mx-auto px-4 md:px-6 pt-8 pb-4 text-sm text-slate-500 max-w-5xl">
         <Link href="/" className="hover:text-blue-600 transition-colors">Início</Link> <span className="mx-2">&gt;</span>
         <Link href="/atividades" className="hover:text-blue-600 transition-colors">Atividades</Link> <span className="mx-2">&gt;</span>
         <Link href={`/atividades/${materia}`} className="hover:text-blue-600 transition-colors">{nomeMateria}</Link>
       </div>
 
-      <main className="container mx-auto px-4 md:px-6 max-w-6xl mt-2">
+      <main className="container mx-auto px-4 md:px-6 max-w-5xl mt-2">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           
           <div className="flex-1 space-y-6 flex flex-col">
-            
-            {/* 🌟 NOVO CONTAINER UNIFICADO (Postagem + Descrição) 🌟 */}
-            <div className="order-1 bg-white rounded-3xl border-2 border-black shadow-sm flex flex-col overflow-hidden">
+            <div className="bg-white border-y sm:border sm:border-slate-200 sm:rounded-2xl overflow-hidden shadow-sm flex flex-col">
               
-              {/* Parte 1: Cabeçalho e Imagem */}
-              <div className="p-5 md:p-8 space-y-6">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
-                    {atividade.titulo}
-                  </h1>
-                  <div className="flex items-center gap-3">
-                    <BotaoFavorito slug={slug} titulo={atividade.titulo} imagem={imagemCapa} materia={materia} variante="minimalista" tipo="atividades" />
-                    <a href="#comentarios" className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-full text-black hover:bg-slate-100 transition-colors active:scale-95" title="Ver comentários">
-                      <span className="material-symbols-outlined font-bold text-xl">chat_bubble</span>
-                    </a>
-                    <BotaoCompartilhar titulo={atividade.titulo} variante="minimalista" />
-                  </div>
-                </div>
+              <Link href={perfilUrl} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-slate-50 transition-colors">
+                <img src={fotoAutor} className="w-9 h-9 rounded-full object-cover border border-slate-200 bg-white" alt={`Foto de ${nomeAutor}`} />
+                <span className="text-sm font-bold text-slate-900">{nomeAutor}</span>
+              </Link>
 
-                <div className="relative border-2 border-black rounded-2xl overflow-hidden bg-slate-100">
-                  <CarrosselImagens imagens={atividade.imagens} titulo={atividade.titulo} />
-                </div>
-
-                {/* Botão de Download na versão Mobile */}
-                {urlDownload && (
-                  <div className="flex justify-center mt-4 lg:hidden">
-                    <BotaoDownload urlParaDownload={urlDownload} titulo={atividade.titulo} isPdf={ehPdf} />
-                  </div>
-                )}
+              <div className="bg-slate-50 w-full border-y border-slate-100 relative">
+                <CarrosselImagens imagens={atividade.imagens} titulo={atividade.titulo} />
               </div>
 
-              {/* Parte 2: Descrição (Agora dentro do mesmo bloco) */}
-              <div className="p-5 md:p-8 border-t-2 border-slate-100 bg-white">
-                <h3 className="font-extrabold text-xl mb-6 text-black border-b-2 border-slate-100 pb-3">Descrição</h3>
-                <div 
-                  className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-black prose-p:leading-relaxed text-slate-700 text-sm md:text-base"
-                  dangerouslySetInnerHTML={{ __html: atividade.contentHtml || "" }} 
-                />
-              </div>
+              {/* AQUI ENTRA O NOSSO NOVO COMPONENTE COM A BARRA E COMENTÁRIOS */}
+              <InteracoesAtividade 
+                atividade={atividade} 
+                slug={slug} 
+                materia={materia} 
+                imagemCapa={imagemCapa} 
+                urlDownload={urlDownload} 
+                ehPdf={ehPdf} 
+              />
+              
             </div>
-            {/* 🌟 FIM DO CONTAINER UNIFICADO 🌟 */}
 
-            <CartaoAutor className="order-3 lg:hidden" />
-            <CartaoDetalhes className="order-4 lg:hidden" />
-
-            <div className="order-5 scroll-mt-24 pt-2" id="comentarios">
-              <Comentarios slug={slug} tipo="atividades" />
-            </div>
+            <CartaoDetalhes className="lg:hidden" />
           </div>
 
-          <aside className="hidden lg:block lg:w-[320px] xl:w-[360px] flex-shrink-0">
+          <aside className="hidden lg:block lg:w-[320px] xl:w-[340px] flex-shrink-0">
             <div className="sticky top-28 space-y-6">
-              {/* Botão de Download na versão Desktop (Aside) */}
-              {urlDownload && <BotaoDownload urlParaDownload={urlDownload} titulo={atividade.titulo} isPdf={ehPdf} />}
-              <CartaoAutor />
+              {urlDownload && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex justify-center">
+                   <BotaoDownload urlParaDownload={urlDownload} titulo={atividade.titulo} isPdf={ehPdf} />
+                </div>
+              )}
               <CartaoDetalhes />
             </div>
           </aside>

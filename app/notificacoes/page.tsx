@@ -28,7 +28,19 @@ export default function NotificacoesPage() {
     );
 
     const unsub = onSnapshot(q, (snap) => {
-      setNotificacoes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      // ✨ NOVO FILTRO: Ignora se o link contém '/mensagens'
+      const apenasNotificacoesReais = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter((notif: any) => {
+          // Se tiver link e ele incluir '/mensagens', retorna false (tira da lista)
+          if (notif.link && typeof notif.link === 'string' && notif.link.includes('/mensagens')) {
+            return false;
+          }
+          // Caso contrário, mantém na lista do sino
+          return true;
+        });
+        
+      setNotificacoes(apenasNotificacoesReais);
     });
 
     return () => unsub();
@@ -74,7 +86,7 @@ export default function NotificacoesPage() {
                     <img src={notif.remetenteFoto} alt="Foto" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center font-bold text-slate-400">
-                      {notif.remetenteNome.charAt(0)}
+                      {notif.remetenteNome?.charAt(0)}
                     </div>
                   )}
                 </div>

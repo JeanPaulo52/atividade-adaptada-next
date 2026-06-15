@@ -34,6 +34,9 @@ export default function PublicProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [seguidores, setSeguidores] = useState(0);
   const [seguindo, setSeguindo] = useState(0);
+  
+  // 🌟 NOVO: ESTADO PARA TRAVAR DUPLOS CLIQUES NO CHAT
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   // Calcula total de posts para o design
   const totalPosts = activities.length + articles.length + momentos.length;
@@ -113,7 +116,7 @@ export default function PublicProfilePage() {
         await setDoc(meuSeguindoRef, { date: Date.now() });
         await setDoc(perfilSeguidoresRef, { date: Date.now() });
 
-        // 🌟 NOTIFICAÇÃO DE NOVO SEGUIDOR 🌟
+        // NOTIFICAÇÃO DE NOVO SEGUIDOR
         await addDoc(collection(db, 'users', perfilId, 'notifications'), {
           remetenteId: usuarioLogado.uid,
           remetenteNome: usuarioLogado.displayName || "Alguém",
@@ -129,32 +132,42 @@ export default function PublicProfilePage() {
     }
   };
 
+  // 🌟 FUNÇÃO ATUALIZADA CONTRA DUPLOS CLIQUES 🌟
   const handleStartChat = async () => {
     if (!usuarioLogado) return alert("Faça login para enviar mensagens");
+    if (isChatLoading) return; // Trava ativada
 
-    // Procurar se já existe um chat entre os dois
-    const chatsRef = collection(db, 'chats');
-    const q = query(chatsRef, where('participants', 'array-contains', usuarioLogado.uid));
-    const querySnapshot = await getDocs(q);
-    
-    let chatId = null;
+    setIsChatLoading(true);
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.participants.includes(perfilId)) {
-        chatId = doc.id;
-      }
-    });
+    try {
+      const chatsRef = collection(db, 'chats');
+      const q = query(chatsRef, where('participants', 'array-contains', usuarioLogado.uid));
+      const querySnapshot = await getDocs(q);
+      
+      let chatId = null;
 
-    if (chatId) {
-      router.push(`/mensagens/${chatId}`);
-    } else {
-      const newChat = await addDoc(collection(db, 'chats'), {
-        participants: [usuarioLogado.uid, perfilId],
-        updatedAt: Date.now(),
-        lastMessage: ""
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.participants && data.participants.includes(perfilId)) {
+          chatId = doc.id;
+        }
       });
-      router.push(`/mensagens/${newChat.id}`);
+
+      if (chatId) {
+        router.push(`/mensagens/${chatId}`);
+      } else {
+        const newChat = await addDoc(collection(db, 'chats'), {
+          participants: [usuarioLogado.uid, perfilId],
+          updatedAt: Date.now(),
+          lastMessage: ""
+        });
+        router.push(`/mensagens/${newChat.id}`);
+      }
+    } catch (error) {
+      console.error("Erro ao iniciar chat:", error);
+      alert("Não foi possível abrir o chat agora.");
+    } finally {
+      setIsChatLoading(false); // Libera a trava caso algo dê errado
     }
   };
 
@@ -169,14 +182,10 @@ export default function PublicProfilePage() {
   return (
     <main className="min-h-screen bg-slate-50 pb-24 md:pb-10 text-slate-800">
       
-      {/* ====================================================
-          CAPA (COVER) COM BOTÃO DE VOLTAR E IDENTIDADE VISUAL
-          ==================================================== */}
+      {/* CAPA (COVER) */}
       <div className="w-full h-48 md:h-72 bg-gradient-to-r from-blue-600 via-purple-500 to-red-600 relative overflow-hidden">
-        {/* Efeito de brilho de fundo (Glassmorphism) */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         
-        {/* Botão de Voltar Flutuante */}
         <button 
           onClick={() => router.back()} 
           className="absolute top-4 left-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-3 py-2 rounded-full transition-all flex items-center gap-2 text-sm font-bold z-10 shadow-sm border border-white/20"
@@ -185,18 +194,15 @@ export default function PublicProfilePage() {
           <span className="hidden sm:block">Voltar</span>
         </button>
 
-        {/* Botão de Opções (Visual) */}
         <button className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white w-9 h-9 rounded-full flex items-center justify-center transition-all z-10 shadow-sm border border-white/20">
           <span className="material-symbols-outlined text-[20px]">more_vert</span>
         </button>
       </div>
 
-      {/* ÁREA PRINCIPAL DO PERFIL */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative -mt-16 md:-mt-24">
         
         {/* CABEÇALHO DO PERFIL */}
         <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-slate-100 p-6 md:p-10">
-          
           <div className="flex flex-col md:flex-row md:items-end gap-5 md:gap-8 relative">
             
             {/* AVATAR SOBREPOSTO */}
@@ -232,7 +238,6 @@ export default function PublicProfilePage() {
             {/* AÇÕES E ESTATÍSTICAS */}
             <div className="flex flex-col items-start md:items-end gap-5 w-full md:w-auto mt-4 md:mt-0">
               
-              {/* BOTÕES: SEGUIR E MENSAGEM */}
               <div className="flex gap-3 w-full md:w-auto">
                 {eMeuPerfil ? (
                   <Link href="/perfil" className="w-full md:w-auto bg-slate-950 text-white font-bold py-2.5 px-8 rounded-full hover:bg-slate-800 transition-colors shadow-md text-sm flex items-center justify-center gap-2">
@@ -255,18 +260,26 @@ export default function PublicProfilePage() {
                       {isFollowing ? 'Seguindo' : 'Seguir'}
                     </button>
 
+                    {/* 🌟 BOTÃO ATUALIZADO COM EFEITO DE CARREGAMENTO 🌟 */}
                     <button 
                       onClick={handleStartChat}
-                      className="flex-1 md:flex-none bg-slate-950 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors shadow-md flex items-center justify-center gap-2"
+                      disabled={isChatLoading}
+                      className={`flex-1 md:flex-none bg-slate-950 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors shadow-md flex items-center justify-center gap-2 ${isChatLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                      <span className="material-symbols-outlined text-[18px]">chat</span>
-                      Mensagem
+                      {isChatLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-[18px]">chat</span>
+                          Mensagem
+                        </>
+                      )}
                     </button>
                   </>
                 )}
               </div>
 
-              {/* MÉTRIQUES */}
+              {/* MÉTRICAS */}
               <div className="flex gap-6 md:gap-8 w-full justify-between md:justify-end border-t md:border-0 border-slate-100 pt-5 md:pt-0 mt-2 md:mt-0 px-2 sm:px-0">
                 <div className="flex flex-col items-center md:items-end">
                   <span className="text-2xl font-extrabold text-slate-950 tracking-tight">{totalPosts}</span>
@@ -286,9 +299,7 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* ====================================================
-            TABS (ABAS)
-            ==================================================== */}
+        {/* TABS (ABAS) */}
         <div className="flex mt-10 border-b border-slate-200 gap-1 sm:gap-4 px-1">
           <button 
             onClick={() => setActiveTab('posts')} 

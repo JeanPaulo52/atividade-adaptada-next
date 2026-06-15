@@ -16,8 +16,9 @@ export default function Navbar() {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // Estado de Notificações
-  const [unreadCount, setUnreadCount] = useState(0);
+  // Estados de Notificações Separados
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [unreadChats, setUnreadChats] = useState(0);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -32,12 +33,29 @@ export default function Navbar() {
           setLoading(false);
         });
 
+        // Busca todas as notificações não lidas
         const notifQuery = query(
           collection(db, "users", currentUser.uid, "notifications"),
           where("lida", "==", false)
         );
+        
         const unsubscribeNotif = onSnapshot(notifQuery, (snap) => {
-          setUnreadCount(snap.docs.length);
+          let chatsCount = 0;
+          let notifsCount = 0;
+
+          snap.docs.forEach(doc => {
+            const data = doc.data();
+            
+            // ✨ NOVO FILTRO: Se o link tem '/mensagens', é do chat!
+            if (data.link && typeof data.link === 'string' && data.link.includes('/mensagens')) {
+              chatsCount++;
+            } else {
+              notifsCount++;
+            }
+          });
+
+          setUnreadChats(chatsCount);
+          setUnreadNotifs(notifsCount);
         });
 
         return () => {
@@ -46,7 +64,8 @@ export default function Navbar() {
         };
       } else {
         setUserData(null);
-        setUnreadCount(0);
+        setUnreadNotifs(0);
+        setUnreadChats(0);
         setLoading(false);
       }
     });
@@ -70,21 +89,18 @@ export default function Navbar() {
             <span className="text-slate-900">.com</span>
           </Link>
 
-          {/* ✨ LINKS DESKTOP ATUALIZADOS ✨ */}
+          {/* LINKS DESKTOP ATUALIZADOS */}
           <div className="flex items-center space-x-8">
-            {/* Raiz agora é a Biblioteca */}
             <Link href="/" className="relative font-bold text-slate-800 hover:text-blue-600 transition-colors group">
               Biblioteca
               <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
             
-            {/* Nova rota da Comunidade */}
             <Link href="/comunidade" className="relative font-medium text-slate-500 hover:text-blue-600 transition-colors group">
               Comunidade
               <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
 
-            {/* Atividades mantidas */}
             <Link href="/atividades" className="relative font-medium text-slate-500 hover:text-blue-600 transition-colors group">
               Atividades
               <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all group-hover:w-full"></span>
@@ -103,17 +119,24 @@ export default function Navbar() {
               <div className="w-10 h-10 bg-slate-200 animate-pulse rounded-full"></div>
             ) : user ? (
               <div className="flex items-center gap-3">
+                {/* SINO DE NOTIFICAÇÕES (DESKTOP) */}
                 <Link href="/notificacoes" className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-all relative">
                   <span className="material-symbols-outlined text-[24px]">notifications</span>
-                  {unreadCount > 0 && (
+                  {unreadNotifs > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white">
-                      {unreadCount > 9 ? '9+' : unreadCount}
+                      {unreadNotifs > 9 ? '9+' : unreadNotifs}
                     </span>
                   )}
                 </Link>
 
-                <Link href="/mensagens" className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-all">
+                {/* ÍCONE DE CHAT (DESKTOP) */}
+                <Link href="/mensagens" className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-all relative">
                   <span className="material-symbols-outlined text-[24px]">chat_bubble</span>
+                  {unreadChats > 0 && (
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white border-2 border-white">
+                      {unreadChats > 9 ? '9+' : unreadChats}
+                    </span>
+                  )}
                 </Link>
 
                 <Link href="/profile" className="ml-2 group">
@@ -150,16 +173,24 @@ export default function Navbar() {
             <BarraPesquisa />
             {user ? (
               <>
+                {/* SINO DE NOTIFICAÇÕES (MOBILE) */}
                 <Link href="/notificacoes" className="text-slate-600 hover:text-blue-600 relative">
                   <span className="material-symbols-outlined text-[26px]">notifications</span>
-                  {unreadCount > 0 && (
+                  {unreadNotifs > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white">
-                      {unreadCount > 9 ? '9+' : unreadCount}
+                      {unreadNotifs > 9 ? '9+' : unreadNotifs}
                     </span>
                   )}
                 </Link>
+
+                {/* ÍCONE DE CHAT (MOBILE) */}
                 <Link href="/mensagens" className="text-slate-600 hover:text-blue-600 relative">
                   <span className="material-symbols-outlined text-[26px]">chat_bubble</span>
+                  {unreadChats > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white border-2 border-white">
+                      {unreadChats > 9 ? '9+' : unreadChats}
+                    </span>
+                  )}
                 </Link>
               </>
             ) : (
@@ -177,19 +208,16 @@ export default function Navbar() {
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-lg border-t border-slate-200/60 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
         <div className="flex justify-around items-center h-16 px-1 relative">
           
-          {/* 1. BIBLIOTECA (Raiz - Substitui o "Início") */}
           <Link href="/" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
             <span className="material-symbols-outlined text-[28px] group-hover:fill-current">local_library</span>
             <span className="text-[10px] font-medium mt-0.5">Biblioteca</span>
           </Link>
 
-          {/* 2. COMUNIDADE (Nova Rota) */}
           <Link href="/comunidade" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
             <span className="material-symbols-outlined text-[28px]">groups</span>
             <span className="text-[10px] font-medium mt-0.5">Comunidade</span>
           </Link>
 
-          {/* 3. BOTÃO POSTAR CENTRAL (FLUTUANTE) */}
           <div className="relative -top-6 flex justify-center items-center">
             <div className="absolute w-[72px] h-[72px] bg-white rounded-full shadow-[0_-4px_10px_rgba(0,0,0,0.04)] -z-10"></div>
             <div className="[&_span.font-bold]:hidden [&_button]:w-[54px] [&_button]:h-[54px] [&_button]:p-0 [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:shadow-blue-500/40 [&_span.material-symbols-outlined]:text-[30px] [&_span.material-symbols-outlined]:m-0 active:scale-95 transition-transform">
@@ -197,13 +225,11 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* 4. ATIVIDADES */}
           <Link href="/atividades" className="flex flex-col items-center justify-center w-14 h-full text-slate-400 hover:text-blue-600 active:scale-95 transition-all group">
             <span className="material-symbols-outlined text-[28px]">extension</span>
             <span className="text-[10px] font-medium mt-0.5">Atividades</span>
           </Link>
 
-          {/* 5. PERFIL */}
           {user ? (
             <Link href="/profile" className="flex flex-col items-center justify-center w-14 h-full active:scale-95 transition-all">
               <div className="w-7 h-7 rounded-full p-[2px] bg-gradient-to-tr from-blue-600 to-red-600">
